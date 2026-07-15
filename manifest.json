@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "Meetza",
+  "version": "2.0.0",
+  "description": "Generate meeting availability from Google Calendar free/busy data.",
+  "minimum_chrome_version": "102",
+  "permissions": [
+    "identity",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.googleapis.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://mail.google.com/*"
+  ],
+  "oauth2": {
+    "client_id": "528363419755-8hpeur98hnfgk95hl1r3n5ovq3ocjfpj.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar.events.freebusy"
+    ]
+  },
+  "background": {
+    "service_worker": "background/background.js"
+  },
+  "action": {
+    "default_title": "Meetza Extension Settings",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/browser16.png",
+      "32": "icons/browser32.png"
+    }
+  },
+  "icons": {
+    "16": "icons/browser16.png",
+    "32": "icons/browser32.png",
+    "48": "icons/browser48.png",
+    "128": "icons/browser128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "panel/panel.html",
+        "icons/icon32.png"
+      ],
+      "matches": [
+        "https://mail.google.com/*"
+      ],
+      "use_dynamic_url": true
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://www.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors https://mail.google.com;"
+  }
+}

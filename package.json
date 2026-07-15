@@ -1,0 +1,14 @@
+{
+  "name": "meetza",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Generate meeting availability from Google Calendar free/busy data.",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "validate": "node scripts/validate-repo.mjs",
+    "check": "npm run test && npm run validate"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
