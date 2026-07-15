@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meetza</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+
+  <body>
+    <main class="panel-shell">
+      <header class="panel-header">
+        <div class="brand">
+          <img src="../icons/icon32.png" class="brand-icon" alt="" />
+
+          <div>
+            <h1>Meetza</h1>
+            <p>Give a slice of your calendar</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="icon-button close-button"
+          data-close
+          aria-label="Close Meetza"
+          title="Close Meetza"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="panel-body">
+        <section class="section section-first">
+          <label class="section-label">Dates</label>
+          <div data-dates></div>
+
+          <button type="button" class="add-day-button" data-add-date>
+            + Add day
+          </button>
+        </section>
+
+        <section class="section">
+          <label class="section-label">People</label>
+          <div class="people" data-people></div>
+
+          <div class="person-input-row">
+            <input
+              type="email"
+              class="text-input"
+              data-person-input
+              placeholder="Add email address"
+              autocomplete="email"
+              inputmode="email"
+            />
+
+            <button
+              type="button"
+              class="add-person-button"
+              data-add-person
+              aria-label="Add person"
+              title="Add person"
+            >
+              +
+            </button>
+
+            <div class="suggestions" data-suggestions hidden></div>
+          </div>
+        </section>
+
+        <section class="section controls-grid">
+          <div>
+            <label class="section-label" for="meeting-length">
+              Meeting Length
+            </label>
+
+            <div class="number-field">
+              <input
+                id="meeting-length"
+                type="text"
+                data-duration
+                inputmode="numeric"
+                pattern="[0-9]*"
+                autocomplete="off"
+              />
+              <span>minutes</span>
+            </div>
+          </div>
+
+          <label>
+            <span class="section-label">Time Zone</span>
+            <select class="select-input" data-timezone></select>
+          </label>
+        </section>
+
+        <div class="feedback" data-feedback hidden></div>
+
+        <button type="button" class="generate-button" data-generate>
+          Generate
+        </button>
+
+        <div class="results" data-results></div>
+      </div>
+    </main>
+
+    <script src="../shared/config.js"></script>
+    <script src="panel.js"></script>
+  </body>
+</html>
