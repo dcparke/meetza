@@ -16,7 +16,7 @@
     "https://mail.google.com/*"
   ],
   "oauth2": {
-    "client_id": "528363419755-8hpeur98hnfgk95hl1r3n5ovq3ocjfpj.apps.googleusercontent.com",
+    "client_id": ["add your client id here]",
     "scopes": [
       "https://www.googleapis.com/auth/calendar.events.freebusy"
     ]
