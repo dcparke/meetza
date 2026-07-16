@@ -1,69 +1,70 @@
-# Security Policy
+# Security
 
-## Supported versions
+Meetza sits next to email and calendar data. That makes restraint more important than features.
 
-Security fixes are applied to the latest release line.
+## What we protect
 
-| Version | Supported |
-|---|---|
-| 2.x | Yes |
-| Earlier prototypes | No |
+- Gmail content
+- Google access tokens
+- Calendar busy ranges
+- Entered calendar addresses
+- Saved settings
+
+## Trust boundaries
+
+The background process is trusted with OAuth and raw FreeBusy data.
+
+The Gmail content script is not. It receives only settings needed for the form and final free ranges. It cannot read extension storage. It cannot make network requests.
+
+The Gmail page is not trusted. The UI lives in a closed Shadow DOM and ignores synthetic button clicks. The page can still remove or cover the extension's host element. That is a denial-of-service risk, not a path to the OAuth token.
+
+Google is trusted to authenticate users and return FreeBusy data over HTTPS.
+
+## Controls
+
+- Gmail permission is optional and off by default
+- Content scripts are registered only while enabled
+- Storage is restricted to trusted extension contexts
+- OAuth tokens never enter Gmail
+- Raw busy ranges never enter Gmail
+- FreeBusy is queried one selected workday at a time
+- Request fields are allowlisted and bounded
+- Google responses are validated
+- Inaccessible calendars fail closed
+- One request may run per Gmail tab
+- Per-tab and global rate limits protect API quota
+- Network requests have a fixed destination
+- Content Security Policy starts with `default-src 'none'`
+- No remote code or runtime dependencies
+
+## Accepted risks
+
+A content script with Gmail permission can technically read Gmail's DOM. Meetza's content script does not, but a malicious release could. The strongest defenses are small code, careful review, and a secure release process.
+
+A hostile Gmail page can hide or remove Meetza's injected host. It cannot use Meetza's extension APIs directly.
+
+Free/busy data can reveal patterns. Meetza requests only the selected workday and does not persist the result.
+
+Edge and Firefox use a public-client PKCE flow. Access tokens remain in memory and may need to be reacquired when the background process restarts. Meetza does not store refresh tokens.
+
+## Release rules
+
+A change needs security review if it adds any of these:
+
+- a Gmail selector that reads message content
+- a new OAuth scope
+- a new host permission or network destination
+- analytics or telemetry
+- a backend service
+- a runtime dependency
+- a web-accessible HTML or JavaScript file
+- token or availability persistence
+- code generation, `eval`, or remotely hosted code
+
+Published builds should come from a protected branch. Use hardware-backed MFA on store and cloud accounts. Keep release artifacts and checksums.
 
 ## Reporting a vulnerability
 
-Please do not open a public GitHub issue for a suspected vulnerability.
+Use GitHub's private security advisory feature. Do not open a public issue for an unpatched vulnerability.
 
-Use GitHub private vulnerability reporting when it is enabled for the repository. If private reporting is unavailable, contact the maintainers through a private channel listed by the repository owner.
-
-Include:
-
-- affected version or commit
-- reproduction steps
-- expected and observed behavior
-- impact assessment
-- proof of concept, if safe to provide
-
-Do not include real user calendar data, OAuth tokens, email content, or other personal data in a report.
-
-## Security boundaries
-
-The project treats these as high-value assets:
-
-- Google OAuth access tokens
-- raw calendar busy timestamps
-- entered calendar identifiers
-- generated availability
-- release and publisher credentials
-
-The intended boundaries are:
-
-- OAuth tokens never leave the service worker.
-- Raw busy ranges never leave the service worker.
-- The Gmail content script does not read email content.
-- The Gmail content script does not read extension storage.
-- The Meetza form is isolated from the Gmail DOM in an extension-origin iframe.
-- Gmail host access is optional and removed when Meetza is disabled.
-
-See [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md).
-
-## Changes that require explicit security review
-
-The following changes must not be treated as routine feature work:
-
-- new OAuth scopes
-- new host permissions
-- new required extension permissions
-- Gmail API access
-- Contacts API access
-- calendar event-list access
-- remote network destinations
-- analytics or telemetry
-- a backend service
-- runtime dependencies
-- remotely hosted code
-- use of `innerHTML`, `eval`, or `new Function`
-- exposing additional web-accessible resources
-- changing message sender validation
-- changing publisher or release controls
-
-Any such change should include an updated threat model and permission justification in the pull request.
+Include the affected version, a short proof of concept, and the impact. We will confirm receipt before discussing a public disclosure date.

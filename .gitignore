@@ -1,4 +1,4 @@
-.DS_Store
-Thumbs.db
+dist/
 *.zip
-node_modules/
+*.pem
+.DS_Store

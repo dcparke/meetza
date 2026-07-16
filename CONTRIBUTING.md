@@ -1,8 +1,10 @@
 # Contributing
 
-Thank you for contributing to Meetza.
+Meetza should stay small.
 
-## Before opening a pull request
+Before adding code, ask whether the feature can be omitted. Every permission and network call is a liability.
+
+## Pull requests
 
 Run:
 
@@ -10,32 +12,18 @@ Run:
 npm run check
 ```
 
-The repository intentionally has no runtime dependencies. Please keep changes small and auditable.
+Keep changes narrow. Explain any effect on permissions, OAuth, storage, Gmail access, or network traffic.
 
-## Code guidelines
+Do not add runtime dependencies without a strong reason and a security review.
 
-- Prefer plain JavaScript, HTML, and CSS.
-- Keep the Gmail content script minimal.
-- Keep OAuth and network access in the service worker.
-- Keep availability calculations in `core/`.
-- Do not place user-controlled data into HTML strings.
-- Use `textContent` and DOM construction for dynamic content.
-- Validate messages again at the service-worker boundary.
-- Fail closed when calendar availability cannot be read.
-- Do not log tokens, calendar identifiers, busy ranges, or generated availability.
-- Avoid adding dependencies when the browser platform can solve the problem directly.
+## Style
 
-## Security-sensitive changes
+Use plain JavaScript and plain language.
 
-Review [SECURITY.md](SECURITY.md) before changing permissions, OAuth scopes, network destinations, storage, message handling, or Gmail integration.
+Prefer a short function with a clear name over a clever abstraction. Comment the reason for a security decision, not the syntax of the next line.
 
-Pull requests that change the trust model should also update:
+Avoid logging user data, calendar IDs, tokens, FreeBusy responses, or email addresses.
 
-- `docs/ARCHITECTURE.md`
-- `docs/THREAT-MODEL.md`
-- `docs/PRIVACY.md`
-- relevant tests or repository validation rules
+## Security
 
-## Commit and pull request scope
-
-Prefer one focused change per pull request. Security review is easier when behavior, permissions, and data flow can be understood from a small diff.
+Read [SECURITY.md](SECURITY.md) before changing the background process, content script, manifest, or authentication code.

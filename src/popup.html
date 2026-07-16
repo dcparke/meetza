@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meetza Extension Settings</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="icons/browser32.png" alt="" />
+        <div>
+          <h1>Meetza Extension Settings</h1>
+          <p>Give a slice of your calendar</p>
+        </div>
+      </header>
+
+      <section class="enabled">
+        <div>
+          <h2>Enabled in Gmail</h2>
+          <p>Show Meetza in Gmail compose windows</p>
+        </div>
+        <label class="switch" aria-label="Enabled in Gmail">
+          <input type="checkbox" data-field="enabled" />
+          <span></span>
+        </label>
+      </section>
+
+      <section class="settings">
+        <div class="two-columns">
+          <label class="field">
+            <span>Meeting Length</span>
+            <div class="number">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" data-field="duration" />
+              <small>min</small>
+            </div>
+          </label>
+
+          <label class="field">
+            <span>Break</span>
+            <div class="number">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" data-field="breakMinutes" />
+              <small>min</small>
+            </div>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Workday Boundary</span>
+          <div class="boundary">
+            <input type="text" inputmode="numeric" data-field="workdayStart" aria-label="Workday start" />
+            <small>to</small>
+            <input type="text" inputmode="numeric" data-field="workdayEnd" aria-label="Workday end" />
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Output Time Zone</span>
+          <select data-field="outputTimezone"></select>
+        </label>
+      </section>
+
+      <section class="settings">
+        <div class="row">
+          <div>
+            <h2>Remember Recent People</h2>
+            <p>Stores up to 15 email addresses locally for autocomplete</p>
+          </div>
+          <label class="switch small" aria-label="Remember recent people">
+            <input type="checkbox" data-field="rememberRecentPeople" />
+            <span></span>
+          </label>
+        </div>
+
+        <button type="button" class="secondary" data-clear>Clear Recent People</button>
+      </section>
+
+      <div class="feedback" data-feedback hidden></div>
+
+      <footer>
+        <button type="button" class="text" data-reset>Reset Defaults</button>
+        <button type="button" class="primary" data-save>Save</button>
+      </footer>
+    </main>
+
+    <script src="platform.js"></script>
+    <script src="common.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

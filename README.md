@@ -1,131 +1,164 @@
 # Meetza
 
-Meetza is a browser extension that generates shareable meeting availability from Google Calendar free/busy data inside Gmail compose windows.
+Meetza does one thing. It finds open time on Google Calendar and turns it into text you can paste into an email.
 
-The project is intentionally small. It has no backend, no analytics, no runtime dependencies, and no access to calendar event details.
+It runs inside Gmail. It has no server. It does not read email. It does not ask Google for event titles, descriptions, locations, or attendees.
+
+## The idea
+
+Most scheduling tools become platforms. Meetza should remain a tool.
+
+The flow is small:
+
+1. Open a Gmail compose window.
+2. Pick dates and calendars.
+3. Click Generate.
+4. Copy the result.
+
+That is the product.
 
 ## Security model
 
-Meetza is designed around data minimization and least privilege:
+Meetza asks Google for free/busy ranges only. The OAuth token and raw busy ranges stay in the background process. The Gmail content script receives final free ranges.
 
-- Google OAuth is limited to `calendar.events.freebusy`.
-- Calendar event titles, descriptions, attendees, locations, and notes are never requested.
-- The OAuth token stays in the extension service worker.
-- Raw busy ranges stay in the service worker.
-- Gmail receives only final free ranges.
-- Gmail access is optional and is removed when Meetza is disabled.
-- The Gmail content script is dynamically registered only while the user has enabled Meetza.
-- Persistent extension storage is restricted to trusted extension contexts.
-- The Meetza form runs in an extension-origin iframe rather than directly in the Gmail DOM.
-- Each selected date is queried only for its configured workday window, so unselected dates and overnight gaps are not fetched.
-- Requests are validated and rate-limited in the service worker.
-- Active Calendar requests are cancelled when their Gmail tab closes or Meetza is disabled.
-- Extension pages use a default-deny Content Security Policy.
+Gmail access is optional. Meetza starts disabled. Enabling it asks for access to `mail.google.com`. Disabling it removes that permission and unregisters the content script.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md).
+The content script uses a closed Shadow DOM. This keeps Meetza's form and results out of Gmail's ordinary DOM. It is not a perfect security boundary. A browser extension that runs on Gmail still has the technical ability to read the page. The current source does not do that, and the content script is kept small so this is easy to audit.
 
-## Data flow
+More detail is in [SECURITY.md](SECURITY.md).
 
-```text
-Gmail compose toolbar
-        |
-        | tiny launcher only
-        v
-Isolated content script
-        |
-        | opens extension-origin iframe
-        v
-Meetza panel
-        |
-        | selected dates, calendars, duration, output time zone
-        v
-Service worker
-        |
-        | OAuth token + Google FreeBusy request
-        v
-Google Calendar FreeBusy API
-        |
-        | busy timestamps only
-        v
-Service worker
-        |
-        | local availability calculation
-        v
-Meetza panel
-        |
-        | free ranges only
-        v
-Clipboard
-```
+## What Meetza stores
 
-## Permissions
+By default, only settings:
 
-| Permission | Why it is needed |
-|---|---|
-| `identity` | Requests a Google OAuth token for the FreeBusy scope. |
-| `storage` | Stores user settings and, only when enabled, up to 15 recent email addresses for autocomplete. |
-| `scripting` | Dynamically registers the minimal Gmail anchor script only while Meetza is enabled. |
-| `https://www.googleapis.com/*` | Allows the service worker to call the Google Calendar FreeBusy endpoint. |
-| Optional `https://mail.google.com/*` | Allows the user to enable the Meetza launcher in Gmail. This permission is removed when Meetza is disabled. |
+- Meeting Length
+- Break
+- Workday Boundary
+- Output Time Zone
+- Whether Meetza is enabled
 
-Meetza does not request `tabs`, Gmail API access, Contacts API access, or calendar event-list access.
+Recent email addresses are optional and off by default. When enabled, Meetza stores at most 15 addresses in extension-local storage.
 
-## Repository structure
+Meetza does not store availability results or Google access tokens.
+
+## Repository
 
 ```text
-background/   OAuth, validation, permissions, rate limiting, FreeBusy calls
-content/      Minimal Gmail launcher and iframe positioning only
-core/         Pure availability and time conversion logic
-panel/        Extension-origin availability UI embedded in Gmail
-popup/        Extension settings UI
-shared/       Shared configuration and constants
-tests/        Dependency-free unit tests
-scripts/      Repository security validation
-.github/      Continuous integration
+src/
+  background.js   Google auth, validation, FreeBusy, rate limits
+  content.js      Gmail button and UI
+  common.js       Settings, dates, time zones, availability math
+  platform.js     Small Chrome/Firefox API wrapper
+  popup.*         Extension settings
+  auth/           Browser-specific Google auth
+
+manifests/        Browser manifests
+scripts/          Build and security checks
+tests/            Unit tests
 ```
 
-## Development setup
+There are no runtime dependencies.
 
-### Requirements
+## Build
 
-- Google Chrome 102 or newer
-- Node.js 20 or newer for tests
-- A Google Cloud project with the Google Calendar API enabled
-- A Chrome Extension OAuth client for the unpacked extension ID
-
-### Install from source
-
-1. Clone the repository.
-2. Open `chrome://extensions`.
-3. Enable Developer mode.
-4. Select **Load unpacked** and choose the repository root.
-5. Copy the extension ID shown by Chrome.
-6. Create a Google OAuth client of type **Chrome Extension** using that extension ID.
-7. Put the client ID in `manifest.json`.
-8. Reload the extension.
-9. Open the Meetza toolbar popup and enable **Enabled in Gmail**.
-10. Approve the Gmail host permission when Chrome asks.
-
-Normal users should install a published build and should not create their own OAuth client.
-
-## Tests
-
-Run all dependency-free tests and repository security checks:
+Node 20 or newer is required.
 
 ```bash
 npm run check
 ```
 
-The checks verify core availability behavior, exact-day data minimization, DST conversion, manifest permissions, OAuth scope, remote-code restrictions, and dangerous DOM sinks.
+This tests the scheduling logic, runs static security checks, and builds all browser targets.
 
-## Security reporting
+### Chrome
 
-Do not open a public issue for a suspected vulnerability. See [SECURITY.md](SECURITY.md).
+Chrome uses the browser's native Google token API.
+
+```bash
+MEETZA_CHROME_CLIENT_ID="your-client-id" npm run build:chrome
+```
+
+The client must be a Google OAuth client for the published Chrome extension ID.
+
+### Edge
+
+Edge does not support Chrome's Google-specific `identity.getAuthToken` path. The Edge build uses OAuth Authorization Code with PKCE and keeps the access token in memory only.
+
+```bash
+MEETZA_EDGE_CLIENT_ID="your-client-id" npm run build:edge
+```
+
+Register the redirect URL returned by `identity.getRedirectURL("oauth2")` in the OAuth client. Test this flow with the final store ID before release.
+
+### Firefox
+
+Firefox uses the same PKCE adapter as Edge, with Firefox's extension-derived loopback redirect.
+
+```bash
+MEETZA_FIREFOX_CLIENT_ID="your-client-id" npm run build:firefox
+```
+
+Replace the placeholder Firefox extension ID in `manifests/firefox.json` before publishing. Use a Google Desktop OAuth client and test the final signed add-on ID before release. Firefox will disclose that Meetza transmits authentication data and calendar email addresses to Google, because the feature cannot work without doing so.
+
+### Safari
+
+Safari is not shipped yet. The shared code is ordinary WebExtensions code, but Safari needs Xcode packaging and a separate, tested Google auth path. We do not weaken OAuth to claim support that is not ready.
 
 ## Browser support
 
-Chrome is the supported target today. See [docs/BROWSER-SUPPORT.md](docs/BROWSER-SUPPORT.md) for the portability plan.
+| Browser | Status |
+|---|---|
+| Chrome | Production path implemented |
+| Edge | Build and PKCE auth adapter included; release credentials and live testing required |
+| Firefox | Build and PKCE auth adapter included; release credentials and live testing required |
+| Safari | Planned; not shipped |
+
+Normal users should never create OAuth credentials. Maintainers create one client per published browser build.
+
+## Permissions
+
+Required:
+
+- `identity` for Google authorization
+- `storage` for settings
+- `scripting` to add or remove Meetza from Gmail
+- `www.googleapis.com` for the FreeBusy request
+
+Optional:
+
+- `mail.google.com`, requested only when Meetza is enabled
+
+Edge and Firefox builds also connect to Google's token endpoint for the PKCE exchange.
+
+## Development
+
+Load the built folder, not the source folder.
+
+```text
+dist/chrome
+dist/edge
+dist/firefox
+```
+
+For Chrome, keep the unpacked extension ID stable while developing or create a matching OAuth client.
+
+## Tests
+
+```bash
+npm test
+npm run audit
+npm run build
+```
+
+The audit rejects common regressions such as:
+
+- static Gmail access
+- `innerHTML`, `eval`, or `new Function`
+- network calls from the Gmail content script
+- storage access from the Gmail content script
+- broad host permissions
+- weak Content Security Policy
+- privacy-sensitive defaults being turned on
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+Apache License 2.0.
