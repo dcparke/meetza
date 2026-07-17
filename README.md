@@ -101,7 +101,7 @@ Replace the placeholder Firefox extension ID in `manifests/firefox.json` before 
 
 ### Safari
 
-Safari is not shipped yet. The shared code is ordinary WebExtensions code, but Safari needs Xcode packaging and a separate, tested Google auth path. We do not weaken OAuth to claim support that is not ready.
+Safari is not supported yet. 
 
 ## Browser support
 
@@ -112,7 +112,7 @@ Safari is not shipped yet. The shared code is ordinary WebExtensions code, but S
 | Firefox | Build and PKCE auth adapter included; release credentials and live testing required |
 | Safari | Planned; not shipped |
 
-Normal users should never create OAuth credentials. Maintainers create one client per published browser build.
+Normal users should never create OAuth credentials. Maintainers create one client per published browser build!
 
 ## Permissions
 

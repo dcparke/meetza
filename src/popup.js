@@ -44,7 +44,7 @@
         return;
       }
 
-      // Reset scheduling preferences without silently changing Gmail access.
+      // Reset scheduling preferences without changing Gmail access.
       write({ ...DEFAULTS, enabled: fields.enabled.checked });
       clearFeedback();
     });
