@@ -61,6 +61,7 @@ There are no runtime dependencies.
 
 ## Build
 
+Current Release: **v1.0.0**
 Node 20 or newer is required.
 
 ```bash
