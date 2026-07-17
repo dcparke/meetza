@@ -1,6 +1,6 @@
 # Contributing
 
-Meetza should stay small.
+Meetza will stay small.
 
 Before adding code, ask whether the feature can be omitted. Every permission and network call is a liability.
 

@@ -1,8 +1,8 @@
 # Security
 
-Meetza sits next to email and calendar data. That makes restraint more important than features.
+Meetza sits next to email and calendar data. That makes the restraint more important than the features.
 
-## What we protect
+## What is protected
 
 - Gmail content
 - Google access tokens
@@ -14,7 +14,7 @@ Meetza sits next to email and calendar data. That makes restraint more important
 
 The background process is trusted with OAuth and raw FreeBusy data.
 
-The Gmail content script is not. It receives only settings needed for the form and final free ranges. It cannot read extension storage. It cannot make network requests.
+The Gmail content script is not. It receives only settings needed for the form and final free ranges. It cannot read extension storage or make network requests.
 
 The Gmail page is not trusted. The UI lives in a closed Shadow DOM and ignores synthetic button clicks. The page can still remove or cover the extension's host element. That is a denial-of-service risk, not a path to the OAuth token.
 
@@ -49,19 +49,11 @@ Edge and Firefox use a public-client PKCE flow. Access tokens remain in memory a
 
 ## Release rules
 
-A change needs security review if it adds any of these:
+Meetza is intentionally small. Changes should preserve that.
 
-- a Gmail selector that reads message content
-- a new OAuth scope
-- a new host permission or network destination
-- analytics or telemetry
-- a backend service
-- a runtime dependency
-- a web-accessible HTML or JavaScript file
-- token or availability persistence
-- code generation, `eval`, or remotely hosted code
+Meetza will not add analytics, telemetry, a backend service, runtime dependencies, remote code, or persistent OAuth and availability data.
 
-Published builds should come from a protected branch. Use hardware-backed MFA on store and cloud accounts. Keep release artifacts and checksums.
+Published builds should come from a protected branch and a reviewed commit. Keep the release artifact and its checksum.
 
 ## Reporting a vulnerability
 

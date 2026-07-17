@@ -15,7 +15,7 @@ The flow is small:
 3. Click Generate.
 4. Copy the result.
 
-That is the product.
+That's it! 
 
 ## Security model
 
@@ -110,7 +110,6 @@ Safari is not supported yet.
 | Chrome | Production path implemented |
 | Edge | Build and PKCE auth adapter included; release credentials and live testing required |
 | Firefox | Build and PKCE auth adapter included; release credentials and live testing required |
-| Safari | Planned; not shipped |
 
 Normal users should never create OAuth credentials. Maintainers create one client per published browser build!
 
@@ -138,8 +137,6 @@ dist/chrome
 dist/edge
 dist/firefox
 ```
-
-For Chrome, keep the unpacked extension ID stable while developing or create a matching OAuth client.
 
 ## Tests
 
