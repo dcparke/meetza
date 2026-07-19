@@ -1,6 +1,6 @@
 # Meetza
 
-Meetza does one thing. It finds open time on Google Calendar and turns it into text you can paste into an email.
+Meetza finds open time on Google Calendar and turns it into text you can paste into an email.
 
 It runs inside Gmail. It has no server. It does not read email. It does not ask Google for event titles, descriptions, locations, or attendees.
 
@@ -57,11 +57,11 @@ scripts/          Build and security checks
 tests/            Unit tests
 ```
 
-There are no runtime dependencies.
+No runtime dependencies.
 
 ## Build
 
-Current Release: **v1.0.0**
+Current Release: **v1.0.2**
 Node 20 or newer is required.
 
 ```bash
@@ -131,7 +131,7 @@ Edge and Firefox builds also connect to Google's token endpoint for the PKCE exc
 
 ## Development
 
-Load the built folder, not the source folder.
+Load the built folder for your preferred browser. 
 
 ```text
 dist/chrome

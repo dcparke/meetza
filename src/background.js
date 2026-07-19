@@ -33,6 +33,12 @@ if (typeof importScripts === "function") {
 
   ensureReady().catch(logInitializationError);
 
+  raw.permissions.onAdded?.addListener((permissions) => {
+    if (permissions.origins?.includes(GMAIL_MATCH)) {
+      enableAfterPermissionAdded().catch(logInitializationError);
+    }
+  });
+
   raw.permissions.onRemoved?.addListener((permissions) => {
     if (permissions.origins?.includes(GMAIL_MATCH)) {
       disableAfterPermissionRemoval().catch(logInitializationError);
@@ -495,6 +501,13 @@ if (typeof importScripts === "function") {
         // No Meetza content script is running in this tab.
       }
     }
+  }
+
+  async function enableAfterPermissionAdded() {
+    await ensureReady();
+    const settings = { ...(await loadSettings()), enabled: true };
+    await storageSet({ [SETTINGS_KEY]: settings });
+    await syncGmail(settings);
   }
 
   async function disableAfterPermissionRemoval() {

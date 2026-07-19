@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Meetza",
-  "version": "1.0.1",
-  "description": "Generate meeting availability from Google Calendar free/busy data.",
+  "version": "1.0.2",
+  "description": "A small browser extension for sharing availability fast.",
   "permissions": ["identity", "storage", "scripting"],
   "host_permissions": [
     "https://www.googleapis.com/*",

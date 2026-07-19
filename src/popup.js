@@ -38,6 +38,7 @@
     const hasGmail = await permissionContains({ origins: [GMAIL_MATCH] });
     write({ ...settings, enabled: settings.enabled && hasGmail });
 
+    fields.enabled.addEventListener("change", toggleGmail);
     document.querySelector("[data-save]").addEventListener("click", save);
     document.querySelector("[data-reset]").addEventListener("click", (event) => {
       if (!event.isTrusted) {
@@ -54,6 +55,47 @@
     });
   }
 
+  async function toggleGmail(event) {
+    if (!event.isTrusted) {
+      return;
+    }
+
+    clearFeedback();
+    fields.enabled.disabled = true;
+
+    try {
+      if (fields.enabled.checked) {
+        const granted = await permissionRequest({ origins: [GMAIL_MATCH] });
+        if (!granted) {
+          fields.enabled.checked = false;
+          throw new Error("Gmail permission was not granted.");
+        }
+
+        await setEnabled(true);
+        await sendMessage({ type: MESSAGES.SYNC_GMAIL });
+      } else {
+        await setEnabled(false);
+        await sendMessage({ type: MESSAGES.SYNC_GMAIL });
+        await permissionRemove({ origins: [GMAIL_MATCH] });
+      }
+    } catch (error) {
+      const stored = await storageGet(SETTINGS_KEY).catch(() => ({}));
+      const hasGmail = await permissionContains({ origins: [GMAIL_MATCH] }).catch(() => false);
+      fields.enabled.checked = normalizeSettings(stored[SETTINGS_KEY]).enabled && hasGmail;
+      showError(error);
+    } finally {
+      fields.enabled.disabled = false;
+    }
+  }
+
+  async function setEnabled(enabled) {
+    const stored = await storageGet(SETTINGS_KEY);
+    const settings = normalizeSettings(stored[SETTINGS_KEY]);
+    await storageSet({
+      [SETTINGS_KEY]: { ...settings, enabled }
+    });
+  }
+
   async function save(event) {
     if (!event.isTrusted) {
       return;
@@ -63,19 +105,8 @@
 
     try {
       const next = read();
-      let hadPermission = false;
-
-      if (next.enabled) {
-        // Keep the permission request as the first asynchronous call so the
-        // browser can tie it to the user's Save click.
-        const granted = await permissionRequest({ origins: [GMAIL_MATCH] });
-        if (!granted) {
-          throw new Error("Gmail permission was not granted.");
-        }
-        hadPermission = true;
-      } else {
-        hadPermission = await permissionContains({ origins: [GMAIL_MATCH] });
-      }
+      const hasGmail = await permissionContains({ origins: [GMAIL_MATCH] });
+      next.enabled = next.enabled && hasGmail;
 
       await storageSet({ [SETTINGS_KEY]: next });
       if (!next.rememberRecentPeople) {
@@ -83,11 +114,6 @@
       }
 
       await sendMessage({ type: MESSAGES.SYNC_GMAIL });
-
-      if (!next.enabled && hadPermission) {
-        await permissionRemove({ origins: [GMAIL_MATCH] });
-      }
-
       setTimeout(() => window.close(), 100);
     } catch (error) {
       showError(error);
